@@ -30,8 +30,8 @@ class ChatGPT:
 
     def setContext(self, context):
         self.history = [
-            {"role": "system", "content": "You are a helpful assistant. use the prompt given by the user for all subsequemt messages"},
-            {"role": "user", "content": context + '\n use this prompt for the rest of our conversation'},
+            {"role": "system", "content": "You are a helpful. Give very confident answers. When you arent sure, ask questions"},
+            {"role": "user", "content": 'this is the full org chart for my company \n' + context},
             {"role": "assistant", "content": "Hi, how may I help?"}
         ]
 
@@ -44,6 +44,9 @@ class ChatGPT:
             return True
         elif prompt == "/exit":
             self.exit()
+            return True
+        elif prompt == "/history":
+            print(self.history)
             return True
         elif prompt == "":
             # this case covers empty prompts
@@ -79,7 +82,7 @@ class ChatGPT:
 
     def run(self):
         # Reset the chat history and print a welcome message
-        self.reset_history()
+        # self.reset_history()
         print("Welcome to ChatGPT in the terminal!\n")
 
         while self.alive:
