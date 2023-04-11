@@ -6,13 +6,30 @@
   "action": {
     "default_popup": "index.html"
   },
-  "content_scripts": [
+  "web_accessible_resources": [
     {
-      "js": ["scripts/content.js"],
+      "resources": [
+        "chat.png"
+      ],
       "matches": [
-        "https://developer.chrome.com/docs/extensions/*",
-        "https://developer.chrome.com/docs/webstore/*"
+        "<all_urls>"
       ]
     }
+  ],
+  "content_scripts": [
+    {
+      "js": [
+        "scripts/content.js"
+      ],
+      "css": [
+        "scripts/style.css"
+      ],
+      "matches": [
+        "https://camsworldweb.mia.ucloud.int/*"
+      ]
+    }
+  ],
+  "permissions": [
+    "webRequest"
   ]
 }
