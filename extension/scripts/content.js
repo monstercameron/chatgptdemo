@@ -72,26 +72,28 @@ const insertChatButton = () => {
 const insertChatThreadContainer = () => {
   console.log("Insert chat thread button into DOM");
 
-
+  // Create the text display element
   const textDisplay = document.createElement("div");
-  const textInput = document.createElement("div");
-
-  // Set the styles for the chat thread element
-  textDisplay.classList.add('chat')
+  textDisplay.textContent = "Chat thread"; // Set the text content for the text display element
 
   // Create a text input element
   const textInputElement = document.createElement('input');
   textInputElement.type = 'text';
   textInputElement.placeholder = 'Type your message here...'; // Optional: Add a placeholder text
 
+  // send button
+  const textInputButton = document.createElement('div');
+  textInputButton.text = '-->';
 
-  textInput.appendChild(textInputElement);
+  // Append the text display and text input elements to the chat thread container
   chatThreadElement.appendChild(textDisplay);
-  chatThreadElement.appendChild(textInput);
+  chatThreadElement.appendChild(textInputElement);
+  chatThreadElement.appendChild(textInputButton);
 
-  chatThreadElement.classList.add('chat')
+  // Add the 'chat' class to the chat thread container (optional, if needed)
+  chatThreadElement.classList.add('chat');
 
-  // Append the chat thread element to the body of the document
+  // Append the chat thread container to the body of the document
   document.body.appendChild(chatThreadElement);
 };
 
@@ -166,4 +168,5 @@ insertChatButton();
 insertChatThreadContainer();
 
 // Insert the chat messages into the chat thread
-chatThreadElement.innerHTML = insertIntoChatThread(chatMessages);
+console.log(chatThreadElement.firstChild);
+chatThreadElement.firstChild.innerHTML = insertIntoChatThread(chatMessages);
