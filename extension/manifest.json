@@ -1,9 +1,18 @@
 {
-    "manifest_version": 3,
-    "name": "Chat With UKG Extension",
-    "description": "Enables chat based enhancements to the UKG PRO Suite",
-    "version": "1.0",
-    "action": {
-      "default_popup": "index.html"
+  "manifest_version": 3,
+  "name": "Chat With UKG Extension",
+  "description": "Enables chat based enhancements to the UKG PRO Suite",
+  "version": "1.0",
+  "action": {
+    "default_popup": "index.html"
+  },
+  "content_scripts": [
+    {
+      "js": ["scripts/content.js"],
+      "matches": [
+        "https://developer.chrome.com/docs/extensions/*",
+        "https://developer.chrome.com/docs/webstore/*"
+      ]
     }
-  }
+  ]
+}
