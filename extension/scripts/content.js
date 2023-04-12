@@ -13,8 +13,14 @@ const badge = document.createElement("div");
 const textInputButton = document.createElement('div');
 const textInputElement = document.createElement('input');
 
+// reset button
+const resetLink = document.createElement("a");
+
 // chat history
-const chatHistory = []
+let chatHistory = []
+
+// Define an array to store chat prompts
+const chatPrePrompts = [{ "role": "system", "content": "you are a helpful assistant" }];
 
 // Define chat messages
 const chatMessages = [
@@ -82,12 +88,12 @@ const insertChatThreadContainer = () => {
   // Create the text display element
   const textDisplay = document.createElement("div");
   textDisplay.classList.add("chatThreadContainer")
-  textDisplay.textContent = "Chat thread"; // Set the text content for the text display element
+  // textDisplay.textContent = "Chat thread"; // Set the text content for the text display element
 
   // Create a text input element
   textInputElement.type = 'text';
   textInputElement.classList.add('textInput')
-  textInputElement.placeholder = 'Type your message here...'; // Optional: Add a placeholder text
+  textInputElement.placeholder = 'type a prompt to krew'; // Optional: Add a placeholder text
 
   // send button
   textInputButton.classList.add("textInputButton")
@@ -116,13 +122,24 @@ const insertChatThreadContainer = () => {
 
 // Insert chat messages into the chat thread
 const insertIntoChatThread = (chatMessages) => {
-  return chatMessages.map(({ role, content }) => {
-    return `<div class="${role} ">${content}</div>`
-  })
-}
+  if (chatMessages.length > 0) {
+    chatThreadElement.firstChild.innerHTML = ''
+    chatMessages.forEach(({ role, content }) => {
+      const div = document.createElement("div");
+      div.classList.add(role)
+      div.textContent = content
+      chatThreadElement.firstChild.appendChild(div)
+    })
 
-// Define an array to store chat prompts
-const chatPrePrompts = [{ "role": "system", "content": "you are a helpful assistant" }];
+    const div = document.createElement("div");
+    div.classList.add("reset")
+    resetLink.textContent = "Reset Chat"
+    div.appendChild(resetLink)
+    chatThreadElement.firstChild.appendChild(div)
+  } else {
+    chatThreadElement.firstChild.innerHTML = 'Ask me anything about your Organization'
+  }
+}
 
 // Send a chat message to OpenAI
 const sendChat = (chatHistory) => {
@@ -151,7 +168,7 @@ const sendChat = (chatHistory) => {
 
       // // Scroll to the bottom of the chat thread
       // chatThreadElement.scrollTop = chatThreadElement.scrollHeight;
-      chatThreadElement.firstChild.innerHTML = insertIntoChatThread(chatHistory);
+      insertIntoChatThread(chatHistory);
     })
     .catch(error => console.error(error));
 };
@@ -163,7 +180,7 @@ badge.addEventListener("click", (event) => {
   // Position the chat thread element below the badge button
   const badgeRect = badge.getBoundingClientRect();
   chatThreadElement.style.top = (badgeRect.bottom + 15) + "px";
-  chatThreadElement.style.left = (badgeRect.left - 130) + "px";
+  chatThreadElement.style.left = (badgeRect.left - 170) + "px";
 
   // Toggle the visibility of the chat thread element
   if (chatThreadVisibility) {
@@ -177,19 +194,40 @@ badge.addEventListener("click", (event) => {
   }
 });
 
-// Add an onclick event listener to the send button
-textInputButton.addEventListener("click", (event) => {
-  event.preventDefault()
+// Function to handle the logic for sending the chat message
+function handleSendMessage() {
   console.log("send", textInputElement.value);
   if (textInputElement.value) {
-    chatHistory.push({ role: "user", content: textInputElement.value.trim() })
+    chatHistory.push({ role: "user", content: textInputElement.value.trim() });
     // send chat to openai
-    sendChat(chatHistory)
+    sendChat(chatHistory);
   } else {
-    textInputElement.placeholder = "Type something here..."
+    textInputElement.placeholder = "Type a prompt to kew";
   }
-  // reset inpit field
+  // reset input field
   textInputElement.value = "";
+}
+
+// Event listener for the "click" event on the textInputButton
+textInputButton.addEventListener("click", (event) => {
+  event.preventDefault();
+  handleSendMessage();
+});
+
+// Event listener for the "keydown" event on the textInputElement
+textInputElement.addEventListener("keydown", (event) => {
+  // Check if the key that was pressed is the Enter key
+  if (event.key === "Enter" || event.keyCode === 13) {
+    event.preventDefault();
+    handleSendMessage();
+  }
+});
+
+// Event listener for the "click" event on the textInputButton
+resetLink.addEventListener("click", (event) => {
+  event.preventDefault();
+  chatHistory = []
+  insertIntoChatThread(chatHistory);
 });
 
 // Insert the chat button and chat thread container into the DOM
@@ -198,4 +236,4 @@ insertChatThreadContainer();
 
 // Insert the chat messages into the chat thread
 // console.log(chatThreadElement.firstChild);
-chatThreadElement.firstChild.innerHTML = insertIntoChatThread([...chatMessages, ...chatMessages]);
+insertIntoChatThread([...chatMessages, ...chatMessages]);
