@@ -13,35 +13,38 @@ const badge = document.createElement("div");
 const textInputButton = document.createElement('div');
 const textInputElement = document.createElement('input');
 
+// chat history
+const chatHistory = []
+
 // Define chat messages
 const chatMessages = [
   {
-    role: "ai",
-    message: "Hello, how can I assist you today?",
+    role: "assistant",
+    content: "Hello, how can I assist you today?",
   },
   {
     role: "user",
-    message: "I need help with my account.",
+    content: "I need help with my account.",
   },
   {
-    role: "ai",
-    message: "Sure, what's the issue?",
-  },
-  {
-    role: "user",
-    message: "I can't log in.",
-  },
-  {
-    role: "ai",
-    message: "Have you tried resetting your password?",
+    role: "assistant",
+    content: "Sure, what's the issue?",
   },
   {
     role: "user",
-    message: "No, I haven't. How do I do that?",
+    content: "I can't log in.",
   },
   {
-    role: "ai",
-    message: "You can reset your password by clicking on the 'Forgot Password' link on the login page.",
+    role: "assistant",
+    content: "Have you tried resetting your password?",
+  },
+  {
+    role: "user",
+    content: "No, I haven't. How do I do that?",
+  },
+  {
+    role: "assistant",
+    content: "You can reset your password by clicking on the 'Forgot Password' link on the login page.",
   },
 ];
 
@@ -78,6 +81,7 @@ const insertChatThreadContainer = () => {
 
   // Create the text display element
   const textDisplay = document.createElement("div");
+  textDisplay.classList.add("chatThreadContainer")
   textDisplay.textContent = "Chat thread"; // Set the text content for the text display element
 
   // Create a text input element
@@ -112,13 +116,13 @@ const insertChatThreadContainer = () => {
 
 // Insert chat messages into the chat thread
 const insertIntoChatThread = (chatMessages) => {
-  return chatMessages.map(({ role, message }) => {
-    return `<div class="${role}">${message}</div>`
+  return chatMessages.map(({ role, content }) => {
+    return `<div class="${role} ">${content}</div>`
   })
 }
 
 // Define an array to store chat prompts
-const chatPrePrompts = [];
+const chatPrePrompts = [{ "role": "system", "content": "you are a helpful assistant" }];
 
 // Send a chat message to OpenAI
 const sendChat = (chatHistory) => {
@@ -126,31 +130,28 @@ const sendChat = (chatHistory) => {
     method: "POST",
     headers: {
       Authorization:
-        "Bearer <token goes here>",
+        "Bearer sk-",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      model: "text-davinci-002",
-      prompt: chatPrePrompts.concat(chatHistory).join('\n'),
-      temperature: 0.7,
-      max_tokens: 60,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-      stop: ["\n"]
+      model: "gpt-3.5-turbo",
+      messages: chatPrePrompts.concat(chatHistory),
+      temperature: 0.7
     }),
   })
     .then(response => response.json())
     .then(data => {
-      const chatResponse = data.choices[0].text.trim();
+      console.log(data);
+      const chatResponse = data.choices[0].message;
       chatHistory.push(chatResponse);
-      // Create a new chat response element and add it to the chat thread
-      const chatResponseElement = document.createElement("div");
-      chatResponseElement.textContent = chatResponse;
-      chatThreadElement.appendChild(chatResponseElement);
+      // // Create a new chat response element and add it to the chat thread
+      // const chatResponseElement = document.createElement("div");
+      // chatResponseElement.textContent = chatResponse;
+      // chatThreadElement.appendChild(chatResponseElement);
 
-      // Scroll to the bottom of the chat thread
-      chatThreadElement.scrollTop = chatThreadElement.scrollHeight;
+      // // Scroll to the bottom of the chat thread
+      // chatThreadElement.scrollTop = chatThreadElement.scrollHeight;
+      chatThreadElement.firstChild.innerHTML = insertIntoChatThread(chatHistory);
     })
     .catch(error => console.error(error));
 };
@@ -180,6 +181,13 @@ badge.addEventListener("click", (event) => {
 textInputButton.addEventListener("click", (event) => {
   event.preventDefault()
   console.log("send", textInputElement.value);
+  if (textInputElement.value) {
+    chatHistory.push({ role: "user", content: textInputElement.value.trim() })
+    // send chat to openai
+    sendChat(chatHistory)
+  } else {
+    textInputElement.placeholder = "Type something here..."
+  }
   // reset inpit field
   textInputElement.value = "";
 });
@@ -189,5 +197,5 @@ insertChatButton();
 insertChatThreadContainer();
 
 // Insert the chat messages into the chat thread
-console.log(chatThreadElement.firstChild);
-chatThreadElement.firstChild.innerHTML = insertIntoChatThread(chatMessages);
+// console.log(chatThreadElement.firstChild);
+chatThreadElement.firstChild.innerHTML = insertIntoChatThread([...chatMessages, ...chatMessages]);

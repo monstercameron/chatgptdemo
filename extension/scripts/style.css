@@ -7,7 +7,7 @@
     filter: invert(1);
 }
 
-.ai {
+.assistant {
     border-radius: 10px;
     padding: 1em;
     padding-bottom: 1.5;
@@ -37,7 +37,10 @@
 .chat {
     padding: 1em;
     position: fixed;
-    width: 300px;
+    width: 400px;
+    height: 600px;
+    overflow-y: hidden;
+    overflow-x: hidden;
     border: 1px solid rgb(178, 175, 175);
     padding: 10px;
     display: none;
@@ -46,9 +49,24 @@
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+.chatThreadContainer {
+    height: 90%;
+    overflow-y: scroll;
+}
+
+
+.chatThreadContainer::-webkit-scrollbar {
+    width: 0;
+    /* Hide scrollbar for WebKit-based browsers */
+}
+
 .textInputContainer {
+    height: 10%;
+    width: 100%;
+    position: absolute;
     display: grid;
     grid-template-columns: 80% 20%;
+    margin-bottom: 10px;
 }
 
 .textInput {
