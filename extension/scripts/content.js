@@ -9,6 +9,10 @@ console.log("Article -->", article);
 const chatThreadElement = document.createElement("div");
 const badge = document.createElement("div");
 
+// send button
+const textInputButton = document.createElement('div');
+const textInputElement = document.createElement('input');
+
 // Define chat messages
 const chatMessages = [
   {
@@ -77,18 +81,27 @@ const insertChatThreadContainer = () => {
   textDisplay.textContent = "Chat thread"; // Set the text content for the text display element
 
   // Create a text input element
-  const textInputElement = document.createElement('input');
   textInputElement.type = 'text';
+  textInputElement.classList.add('textInput')
   textInputElement.placeholder = 'Type your message here...'; // Optional: Add a placeholder text
 
   // send button
-  const textInputButton = document.createElement('div');
-  textInputButton.text = '-->';
+  textInputButton.classList.add("textInputButton")
+  const img = document.createElement("img");
+  // Set the src and alt attributes of the chat button
+  img.src = chrome.runtime.getURL(`send.png`);
+  img.alt = "Chat icon";
+  textInputButton.appendChild(img);
+
+  // input container
+  const textInputContainer = document.createElement('div');
+  textInputContainer.classList.add("textInputContainer")
+  textInputContainer.appendChild(textInputElement)
+  textInputContainer.appendChild(textInputButton)
 
   // Append the text display and text input elements to the chat thread container
   chatThreadElement.appendChild(textDisplay);
-  chatThreadElement.appendChild(textInputElement);
-  chatThreadElement.appendChild(textInputButton);
+  chatThreadElement.appendChild(textInputContainer);
 
   // Add the 'chat' class to the chat thread container (optional, if needed)
   chatThreadElement.classList.add('chat');
@@ -161,6 +174,14 @@ badge.addEventListener("click", (event) => {
     chatThreadElement.classList.add('fade-in')
     chatThreadVisibility = true;
   }
+});
+
+// Add an onclick event listener to the send button
+textInputButton.addEventListener("click", (event) => {
+  event.preventDefault()
+  console.log("send", textInputElement.value);
+  // reset inpit field
+  textInputElement.value = "";
 });
 
 // Insert the chat button and chat thread container into the DOM

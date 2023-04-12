@@ -9,7 +9,8 @@
   "web_accessible_resources": [
     {
       "resources": [
-        "chat.png"
+        "chat.png",
+        "send.png"
       ],
       "matches": [
         "<all_urls>"

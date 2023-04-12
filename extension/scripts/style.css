@@ -46,8 +46,32 @@
     box-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.textDisplay{}
-.textInput{}
+.textInputContainer {
+    display: grid;
+    grid-template-columns: 80% 20%;
+}
+
+.textInput {
+    border: 1px solid rgb(143, 223, 255);
+    padding: 1em;
+    border-radius: 5px;
+}
+
+.textInputButton {
+    background-color: rgb(2, 175, 2);
+    border-radius: 100%;
+    width: 50px;
+    padding: 5px;
+    cursor: pointer;
+    margin: auto;
+}
+
+.textInputButton img {
+    filter: invert(1);
+    width: 75%;
+    display: block;
+    margin: auto;
+}
 
 .fade-in {
     opacity: 0;
