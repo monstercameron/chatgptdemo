@@ -2,7 +2,7 @@
 let chatThreadVisibility = false;
 
 // Get the header bar element
-const article = document.querySelector("#header-bar-slots");
+let article = document.querySelector("#header-bar-slots");
 console.log("Article -->", article);
 
 // Create the chat thread and badge elements
@@ -14,7 +14,7 @@ const textInputButton = document.createElement('div');
 const textInputElement = document.createElement('input');
 
 // reset button
-const resetLink = document.createElement("a");
+const resetLink = document.createElement("span");
 
 // chat history
 let chatHistory = []
@@ -77,6 +77,11 @@ const insertChatButton = () => {
   badge.appendChild(img);
 
   // Insert the badge element to the beginning of the article element
+  while (!article) {
+    console.log("Trying to get the insertion point again");
+    article = document.querySelector("#header-bar-slots");
+  }
+
   article.insertBefore(badge, article.firstChild);
   article.firstChild.classList.add('container', 'pointer')
 };
