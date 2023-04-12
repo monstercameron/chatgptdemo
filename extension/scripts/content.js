@@ -13,51 +13,24 @@ const badge = document.createElement("div");
 const textInputButton = document.createElement('div');
 const textInputElement = document.createElement('input');
 
+// Create the text display element
+const textDisplay = document.createElement("div");
+
 // reset button
 const resetLink = document.createElement("span");
+
+// full context
+let context = []
 
 // chat history
 let chatHistory = []
 
 // Define an array to store chat prompts
-const chatPrePrompts = [{ "role": "system", "content": "you are a helpful assistant" }];
-
-// Define chat messages
-const chatMessages = [
-  {
-    role: "assistant",
-    content: "Hello, how can I assist you today?",
-  },
-  {
-    role: "user",
-    content: "I need help with my account.",
-  },
-  {
-    role: "assistant",
-    content: "Sure, what's the issue?",
-  },
-  {
-    role: "user",
-    content: "I can't log in.",
-  },
-  {
-    role: "assistant",
-    content: "Have you tried resetting your password?",
-  },
-  {
-    role: "user",
-    content: "No, I haven't. How do I do that?",
-  },
-  {
-    role: "assistant",
-    content: "You can reset your password by clicking on the 'Forgot Password' link on the login page.",
-  },
-];
+const chatPrePrompts = [{ "role": "system", "content": "you are a confident and helpful assistant" }];
 
 // Insert the chat button into the DOM
 const insertChatButton = () => {
-  console.log("Insert chat button into DOM");
-
+  // console.log("Insert chat button into DOM");
   const img = document.createElement("img");
 
   // Set the src and alt attributes of the chat button
@@ -77,7 +50,7 @@ const insertChatButton = () => {
   badge.appendChild(img);
 
   // Insert the badge element to the beginning of the article element
-  while (!article) {
+  if (!article) {
     console.log("Trying to get the insertion point again");
     article = document.querySelector("#header-bar-slots");
   }
@@ -86,14 +59,31 @@ const insertChatButton = () => {
   article.firstChild.classList.add('container', 'pointer')
 };
 
+// Insert krew into chat thread 
+const insertKrew = () => {
+  // insert krew
+  const krewContainer = document.createElement("div");
+  krewContainer.classList.add("krew")
+  const krewImage = document.createElement("img");
+  krewImage.src = chrome.runtime.getURL(`krew.png`);
+
+  // initial krew message
+  const krewMessage = document.createElement("div");
+  krewMessage.classList.add("assistant")
+  krewMessage.textContent = "Hi, I'm Krew, How can I help you with the Orgchart?"
+
+  krewContainer.appendChild(krewImage)
+  textDisplay.appendChild(krewContainer)
+  textDisplay.appendChild(krewMessage)
+}
+
 // Insert the chat thread container into the DOM
 const insertChatThreadContainer = () => {
-  console.log("Insert chat thread button into DOM");
-
-  // Create the text display element
-  const textDisplay = document.createElement("div");
+  // console.log("Insert chat thread button into DOM");
   textDisplay.classList.add("chatThreadContainer")
   // textDisplay.textContent = "Chat thread"; // Set the text content for the text display element
+
+  insertKrew()
 
   // Create a text input element
   textInputElement.type = 'text';
@@ -129,10 +119,17 @@ const insertChatThreadContainer = () => {
 const insertIntoChatThread = (chatMessages) => {
   if (chatMessages.length > 0) {
     chatThreadElement.firstChild.innerHTML = ''
+    insertKrew()
     chatMessages.forEach(({ role, content }) => {
       const div = document.createElement("div");
       div.classList.add(role)
-      div.textContent = content
+
+      if (role === "assistant") {
+        div.innerHTML = content
+      } else {
+        div.innerHTML = content.split(',')[0]
+      }
+
       chatThreadElement.firstChild.appendChild(div)
     })
 
@@ -142,12 +139,15 @@ const insertIntoChatThread = (chatMessages) => {
     div.appendChild(resetLink)
     chatThreadElement.firstChild.appendChild(div)
   } else {
-    chatThreadElement.firstChild.innerHTML = 'Ask me anything about your Organization'
+    chatThreadElement.firstChild.innerHTML = ''
+    insertKrew()
   }
 }
 
 // Send a chat message to OpenAI
 const sendChat = (chatHistory) => {
+  const messages = chatPrePrompts.concat(chatHistory)
+  // console.log(messages);
   fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -157,7 +157,7 @@ const sendChat = (chatHistory) => {
     },
     body: JSON.stringify({
       model: "gpt-3.5-turbo",
-      messages: chatPrePrompts.concat(chatHistory),
+      messages,
       temperature: 0.7
     }),
   })
@@ -166,13 +166,6 @@ const sendChat = (chatHistory) => {
       console.log(data);
       const chatResponse = data.choices[0].message;
       chatHistory.push(chatResponse);
-      // // Create a new chat response element and add it to the chat thread
-      // const chatResponseElement = document.createElement("div");
-      // chatResponseElement.textContent = chatResponse;
-      // chatThreadElement.appendChild(chatResponseElement);
-
-      // // Scroll to the bottom of the chat thread
-      // chatThreadElement.scrollTop = chatThreadElement.scrollHeight;
       insertIntoChatThread(chatHistory);
     })
     .catch(error => console.error(error));
@@ -203,7 +196,7 @@ badge.addEventListener("click", (event) => {
 function handleSendMessage() {
   console.log("send", textInputElement.value);
   if (textInputElement.value) {
-    chatHistory.push({ role: "user", content: textInputElement.value.trim() });
+    chatHistory.push({ role: "user", content: textInputElement.value.trim() + ", respond in html" });
     // send chat to openai
     sendChat(chatHistory);
   } else {
@@ -235,10 +228,86 @@ resetLink.addEventListener("click", (event) => {
   insertIntoChatThread(chatHistory);
 });
 
+// Load JSON for context
+const loadJson = (callback) => {
+  const jsonUrl = chrome.runtime.getURL('json.txt');
+  // console.log(jsonUrl);
+
+  // Fetch the contents of the JSON file
+  fetch(jsonUrl)
+    .then((response) => {
+      // Check if the response is OK (status code 200)
+      if (!response.ok) {
+        throw new Error('Failed to fetch JSON file');
+      }
+      // Parse the JSON data
+      return response.json();
+    })
+    .then((newContext) => {
+      // Log the parsed JSON data
+      // console.log(context);
+      context = newContext.data;
+      callback()
+    })
+    .catch((error) => {
+      // Log any errors that occurred during the fetch and parsing process
+      console.error(error);
+    });
+};
+
+const pickKeys = (obj, keys) => {
+  const result = {};
+  keys.forEach((key) => {
+    if (obj.hasOwnProperty(key)) {
+      result[key] = obj[key];
+    }
+  });
+  return result;
+}
+
+// get context for chat
+const getContext = (whatContext) => {
+  const fields = []
+  switch (whatContext) {
+    case 'gender':
+      fields.push(...["EmployeeName", "Gender", "ManagerName", "CompanyName"])
+      break;
+    case 'positions':
+      fields.push(...["EmployeeName", "ManagerName", "CompanyName", "JobDescription"])
+      break;
+    case 'details':
+      fields.push(...["EmployeeName", "ManagerName", "CompanyName", "EecFullTimeOrPartTime", "Location", "OriginalHireDate", "WorkPhoneNumber", "JobDescription"])
+      break;
+    default:
+      break
+  }
+  // console.log(fields, context);
+  // const chatPrePrompts = [{ "role": "system", "content": "you are a helpful assistant" }];
+  const newContext = context.map((itm) => {
+    // console.log(itm, fields);
+    const newItm = pickKeys(itm, fields)
+    // console.log(newItm);
+    let sentence = ''
+    for (const key in newItm) {
+      // console.log(key);
+      sentence += `${key} : ${newItm[key]}, `
+    }
+    // console.log("sentence ->", sentence);
+    return sentence
+  }).join("")
+  console.log("newContext ->", newContext);
+  chatPrePrompts.push({ "role": "user", "content": `this is my orgchart ${newContext}` });
+  chatPrePrompts.push({ "role": "assistant", "content": `<div>Hi, how may I help you?</div>` });
+}
+
 // Insert the chat button and chat thread container into the DOM
 insertChatButton();
 insertChatThreadContainer();
+loadJson(() => {
+  getContext("gender")
+});
+
 
 // Insert the chat messages into the chat thread
 // console.log(chatThreadElement.firstChild);
-insertIntoChatThread([...chatMessages, ...chatMessages]);
+// insertIntoChatThread([...chatMessages, ...chatMessages]);

@@ -22,7 +22,7 @@
     border-radius: 10px;
     padding: 1em;
     padding-bottom: 1.5;
-    background-color: #2befe5;
+    background-color: #30CEBB;
     width: 80%;
     margin-left: auto;
     color: white;
@@ -72,6 +72,19 @@
     /* Hide scrollbar for WebKit-based browsers */
 }
 
+.krew {
+    background-color: white;
+    border-radius: 100%;
+    width: 20%;
+    /* border: 1px solid black; */
+    margin-bottom: 35px;
+}
+
+.krew img {
+    margin-left: 10px;
+    width: 75%;
+}
+
 .textInputContainer {
     height: 10%;
     width: 100%;
@@ -82,13 +95,13 @@
 }
 
 .textInput {
-    border: 1px solid rgb(143, 223, 255);
+    border: 1px solid #30CEBB;
     padding: 1em;
-    border-radius: 5px;
+    border-radius: 15px;
 }
 
 .textInputButton {
-    background-color: rgb(2, 175, 2);
+    background-color: #0E877E;
     border-radius: 100%;
     width: 45px;
     height: 45px;
