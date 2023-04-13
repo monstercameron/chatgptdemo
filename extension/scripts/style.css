@@ -85,11 +85,45 @@
     width: 75%;
 }
 
+.loading {
+    display: block;
+    text-align: center;
+}
+
+.loading img {
+    display: inline-block;
+    width: 35%;
+}
+
 .textInputContainer {
     height: 10%;
     width: 100%;
     position: absolute;
     display: grid;
+    grid-template-columns: 80% 20%;
+    margin-bottom: 10px;
+}
+
+.contextPickerContainer div {
+    border-radius: 1px solid black;
+    border-radius: 5px;
+    background-color: white;
+    padding: .5em;
+    display: inline-block;
+    text-transform: capitalize;
+    margin-right: 1em;
+    margin-bottom: 1em;
+    cursor: pointer;
+}
+
+.contextPickerContainer div:hover {
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.contextPickerContainer {
+    height: 10%;
+    width: 100%;
+    position: absolute;
     grid-template-columns: 80% 20%;
     margin-bottom: 10px;
 }

@@ -10,11 +10,15 @@ const chatThreadElement = document.createElement("div");
 const badge = document.createElement("div");
 
 // send button
+const textInputContainer = document.createElement('div');
 const textInputButton = document.createElement('div');
 const textInputElement = document.createElement('input');
 
 // Create the text display element
 const textDisplay = document.createElement("div");
+
+// loading anim div
+const loadingAnim = document.createElement("div");
 
 // reset button
 const resetLink = document.createElement("span");
@@ -25,8 +29,13 @@ let context = []
 // chat history
 let chatHistory = []
 
+// choose between user input and choosing context
+let toggleContext = true
+let chosenContext = ""
+const contextContainer = document.createElement('div');
+
 // Define an array to store chat prompts
-const chatPrePrompts = [{ "role": "system", "content": "you are a confident and helpful assistant" }];
+let chatPrePrompts = []
 
 // Insert the chat button into the DOM
 const insertChatButton = () => {
@@ -84,6 +93,8 @@ const insertChatThreadContainer = () => {
   // textDisplay.textContent = "Chat thread"; // Set the text content for the text display element
 
   insertKrew()
+  insertContextPicker()
+  insertLoadAnim()
 
   // Create a text input element
   textInputElement.type = 'text';
@@ -99,7 +110,7 @@ const insertChatThreadContainer = () => {
   textInputButton.appendChild(img);
 
   // input container
-  const textInputContainer = document.createElement('div');
+  textInputContainer.style.visibility = 'hidden';
   textInputContainer.classList.add("textInputContainer")
   textInputContainer.appendChild(textInputElement)
   textInputContainer.appendChild(textInputButton)
@@ -133,6 +144,7 @@ const insertIntoChatThread = (chatMessages) => {
       chatThreadElement.firstChild.appendChild(div)
     })
 
+    insertLoadAnim()
     const div = document.createElement("div");
     div.classList.add("reset")
     resetLink.textContent = "Reset Chat"
@@ -167,6 +179,8 @@ const sendChat = (chatHistory) => {
       const chatResponse = data.choices[0].message;
       chatHistory.push(chatResponse);
       insertIntoChatThread(chatHistory);
+      textInputElement.disabled = false;
+      loadingAnim.style.display = 'none'
     })
     .catch(error => console.error(error));
 };
@@ -197,13 +211,17 @@ function handleSendMessage() {
   console.log("send", textInputElement.value);
   if (textInputElement.value) {
     chatHistory.push({ role: "user", content: textInputElement.value.trim() + ", respond in html" });
+    insertIntoChatThread(chatHistory);
     // send chat to openai
+    // insertLoadAnim()
+    loadingAnim.style.display = 'block'
     sendChat(chatHistory);
   } else {
     textInputElement.placeholder = "Type a prompt to kew";
   }
   // reset input field
   textInputElement.value = "";
+  textInputElement.disabled = true;
 }
 
 // Event listener for the "click" event on the textInputButton
@@ -226,6 +244,9 @@ resetLink.addEventListener("click", (event) => {
   event.preventDefault();
   chatHistory = []
   insertIntoChatThread(chatHistory);
+  insertContextPicker()
+  contextContainer.style.visibility = 'visible';
+  textInputContainer.style.visibility = 'hidden';
 });
 
 // Load JSON for context
@@ -267,13 +288,14 @@ const pickKeys = (obj, keys) => {
 
 // get context for chat
 const getContext = (whatContext) => {
+  // console.log('getContext:', whatContext);
   const fields = []
   switch (whatContext) {
     case 'gender':
       fields.push(...["EmployeeName", "Gender", "ManagerName", "CompanyName"])
       break;
     case 'positions':
-      fields.push(...["EmployeeName", "ManagerName", "CompanyName", "JobDescription"])
+      fields.push(...["EmployeeName", "ManagerName", "CompanyName", "JobDescription", "TotalPosition"])
       break;
     case 'details':
       fields.push(...["EmployeeName", "ManagerName", "CompanyName", "EecFullTimeOrPartTime", "Location", "OriginalHireDate", "WorkPhoneNumber", "JobDescription"])
@@ -296,17 +318,68 @@ const getContext = (whatContext) => {
     return sentence
   }).join("")
   console.log("newContext ->", newContext);
+  chatPrePrompts = []
+  chatPrePrompts.push({ "role": "system", "content": "you are a confident and helpful assistant" });
   chatPrePrompts.push({ "role": "user", "content": `this is my orgchart ${newContext}` });
   chatPrePrompts.push({ "role": "assistant", "content": `<div>Hi, how may I help you?</div>` });
+}
+
+const insertContextPicker = () => {
+  contextContainer.innerHTML = `
+    <div>Ask me about diversity</div>
+    <div>Ask me about employees</div>
+    <div>Ask me about positions and salaries</div>
+  `
+  // Get all the div elements
+  const divElements = contextContainer.querySelectorAll('div');
+
+  // Loop through the div elements and attach onclick listeners
+  divElements.forEach(div => {
+    div.onclick = () => {
+      // Do something when the div is clicked
+      console.log(`You clicked: ${div.textContent}`);
+      switch (div.textContent.toLowerCase()) {
+        case "Ask me about diversity".toLowerCase():
+          chosenContext = 'gender'
+          getContext('gender')
+          break;
+        case "Ask me About Employees".toLowerCase():
+          chosenContext = 'positions'
+          getContext('positions')
+          break;
+        case "Ask Me About Positions And Salaries".toLowerCase():
+          chosenContext = 'details'
+          getContext('details')
+          break;
+        default:
+          break;
+      }
+      contextContainer.style.visibility = 'hidden';
+      textInputContainer.style.visibility = 'visible';
+    };
+  });
+  contextContainer.classList.add("contextPickerContainer")
+  textDisplay.appendChild(contextContainer);
+}
+
+const insertLoadAnim = () => {
+  loadingAnim.classList.add('loading')
+  loadingAnim.style.display = 'none'
+  const img = document.createElement("img");
+  img.src = chrome.runtime.getURL(`loading.gif`);
+  img.alt = "Chat icon";
+  if (!loadingAnim.hasChildNodes()) {
+    loadingAnim.appendChild(img);
+  }
+  textDisplay.appendChild(loadingAnim)
 }
 
 // Insert the chat button and chat thread container into the DOM
 insertChatButton();
 insertChatThreadContainer();
 loadJson(() => {
-  getContext("gender")
+  console.log('Data Loaded');
 });
-
 
 // Insert the chat messages into the chat thread
 // console.log(chatThreadElement.firstChild);

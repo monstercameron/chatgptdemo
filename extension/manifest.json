@@ -17,7 +17,8 @@
         "chat.png",
         "send.png",
         "krew.png",
-        "json.txt"
+        "json.txt",
+        "loading.gif"
       ],
       "matches": [
         "<all_urls>"
